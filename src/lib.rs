@@ -31,7 +31,7 @@
 //!
 //! The output will be
 //!
-//! ```ignore
+//! ```compile_fail
 //! factors: [97, 98, 97, 97, 256, 256, 256, 257, 98, 98, 258]
 //! defined_factors: 261
 //! ```
@@ -60,7 +60,7 @@
 //!
 //! The output will be
 //!
-//! ```ignore
+//! ```compile_fail
 //! text: "abaaabababaabbabab"
 //! ```
 //!
