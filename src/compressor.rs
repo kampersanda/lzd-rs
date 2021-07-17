@@ -199,8 +199,8 @@ mod tests {
     }
 
     #[test]
-    fn alice() {
-        let mut file = File::open("data/alice29.txt").expect("File not found");
+    fn alice29() {
+        let mut file = File::open("cantrbry/alice29.txt").unwrap();
         let mut text: Vec<u8> = Vec::new();
         let _ = file.read_to_end(&mut text).unwrap();
 

@@ -6,6 +6,7 @@ use clap::{App, Arg};
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
+use std::time;
 
 fn main() {
     let matches = App::new("unlzd")
@@ -35,7 +36,9 @@ fn main() {
     let default_output_fn = input_path.file_stem().unwrap().to_str().unwrap();
     let output_fn = matches.value_of("output_fn").unwrap_or(&default_output_fn);
 
+    let mut stream = BufWriter::new(File::create(output_fn).unwrap());
     let mut ids: Vec<usize> = Vec::new();
+
     {
         let mut deser = Deserializer::new(input_fn).unwrap();
         let mut upper = (FACTOR_OFFSET + 1) as u64; // +1 to avoid use of factor ID zero.
@@ -62,6 +65,12 @@ fn main() {
         }
     }
 
-    let mut stream = BufWriter::new(File::create(output_fn).unwrap());
+    let ins = time::Instant::now();
     Decompressor::run(&ids, |c| stream.write_all(&[c]).unwrap());
+    stream.flush().unwrap();
+    let elapsed_ms = ins.elapsed().as_millis() as f64;
+
+    println!("Decompression time in ms: {}", elapsed_ms);
+    println!("Decompression time in sec: {}", elapsed_ms / 1000.0);
+    println!("Number of extracted factors: {}", ids.len());
 }
