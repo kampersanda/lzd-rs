@@ -1,8 +1,5 @@
 #![allow(dead_code)]
 
-pub const FACTOR_OFFSET: usize = 256;
-pub const NIL_ID: usize = usize::MAX;
-
 pub fn bytes_for(nbits: usize) -> usize {
     (nbits + 7) / 8
 }
@@ -28,7 +25,7 @@ pub fn msb(mut x: u64) -> usize {
 }
 
 fn bit_position(x: u64) -> usize {
-    DEBRUIJN64_MAPPING[((x * DEBRUIJN64) >> 58) as usize] as usize
+    DEBRUIJN64_MAPPING[(DEBRUIJN64.wrapping_mul(x) >> 58) as usize] as usize
 }
 
 const DEBRUIJN64_MAPPING: [u8; 64] = [

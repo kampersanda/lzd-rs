@@ -1,5 +1,6 @@
-use crate::misc::NIL_ID;
 use std::cmp;
+
+pub const NIL_ID: usize = usize::MAX;
 
 #[derive(Debug)]
 struct Node<'text> {

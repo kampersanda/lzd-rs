@@ -1,5 +1,6 @@
-use crate::misc::*;
-use crate::trie::Trie;
+use crate::trie::{Trie, NIL_ID};
+
+pub const FACTOR_OFFSET: usize = 256;
 
 #[derive(Clone, Copy, Debug)]
 struct Factor {
@@ -172,7 +173,7 @@ mod tests {
     }
 
     #[test]
-    fn tiny_test() {
+    fn tiny() {
         let text = "abaaabababaabbabab".as_bytes();
 
         let mut ids: Vec<usize> = Vec::new();
@@ -185,7 +186,7 @@ mod tests {
     }
 
     #[test]
-    fn short_test() {
+    fn short() {
         let text = "ddadabaddaccdababddccccaccdcaddccacaaabcdbbddacbcbbbdcaadbbcbaddcbcdbaacbbddddbcdbdabdbcbbbcdcdcbada".as_bytes();
 
         let mut ids: Vec<usize> = Vec::new();
@@ -198,7 +199,7 @@ mod tests {
     }
 
     #[test]
-    fn alice_test() {
+    fn alice() {
         let mut file = File::open("data/alice29.txt").expect("File not found");
         let mut text: Vec<u8> = Vec::new();
         let _ = file.read_to_end(&mut text).unwrap();

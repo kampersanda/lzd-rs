@@ -1,3 +1,5 @@
+use crate::misc::bytes_for;
+
 use std::fs::File;
 use std::io::{BufReader, Read, Result};
 
@@ -37,7 +39,7 @@ impl Deserializer {
             nbits -= i;
         }
 
-        let read_nbytes = nbytes_for(nbits);
+        let read_nbytes = bytes_for(nbits);
         assert_ne!(read_nbytes, 0);
 
         for _ in 1..read_nbytes {
@@ -59,13 +61,10 @@ impl Deserializer {
     }
 }
 
-fn nbytes_for(nbits: usize) -> usize {
-    (nbits + 7) / 8
-}
-
 #[cfg(test)]
 mod tests {
     use crate::deserializer::Deserializer;
+    use crate::misc::needed_bits;
 
     use std::fs::{remove_file, File};
     use std::io::Write;
@@ -84,24 +83,12 @@ mod tests {
         {
             let mut des = Deserializer::new(tmpfile).unwrap();
             for x in ints {
-                let nbits = needed_nbits(x);
+                let nbits = needed_bits(x);
                 let y = des.read(nbits).unwrap();
                 assert_eq!(x, y);
             }
         }
 
         remove_file(tmpfile).unwrap();
-    }
-
-    fn needed_nbits(mut x: u64) -> usize {
-        if x == 0 {
-            return 1;
-        }
-        let mut i = 0;
-        while x != 0 {
-            i += 1;
-            x >>= 1;
-        }
-        i
     }
 }

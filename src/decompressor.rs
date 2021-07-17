@@ -1,4 +1,6 @@
-use crate::misc::*;
+use crate::compressor;
+
+pub const FACTOR_OFFSET: usize = compressor::FACTOR_OFFSET;
 
 pub struct Decompressor<'ids> {
     ids: &'ids [usize],
@@ -42,8 +44,7 @@ impl<'ids> Decompressor<'ids> {
 
 #[cfg(test)]
 mod tests {
-    use crate::decompressor::Decompressor;
-    use crate::misc::*;
+    use crate::decompressor::{Decompressor, FACTOR_OFFSET};
 
     #[test]
     fn tiny() {

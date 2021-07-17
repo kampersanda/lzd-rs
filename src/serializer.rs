@@ -71,6 +71,7 @@ impl Serializer {
 
 #[cfg(test)]
 mod tests {
+    use crate::misc::needed_bits;
     use crate::serializer::Serializer;
 
     use std::fs::{remove_file, File};
@@ -84,7 +85,7 @@ mod tests {
         {
             let mut ser = Serializer::new(tmpfile).unwrap();
             for x in &ints {
-                let nbits = needed_nbits(*x);
+                let nbits = needed_bits(*x);
                 ser.write(*x, nbits).unwrap();
             }
             ser.finish().unwrap();
@@ -101,7 +102,7 @@ mod tests {
         }
 
         for x in &ints {
-            let nbits = needed_nbits(*x);
+            let nbits = needed_bits(*x);
             let mask = (1 << nbits) - 1;
             let y = serialized & mask;
             assert_eq!(*x, y);
@@ -109,17 +110,5 @@ mod tests {
         }
 
         remove_file(tmpfile).unwrap();
-    }
-
-    fn needed_nbits(mut x: u64) -> usize {
-        if x == 0 {
-            return 1;
-        }
-        let mut i = 0;
-        while x != 0 {
-            i += 1;
-            x >>= 1;
-        }
-        i
     }
 }
