@@ -11,7 +11,7 @@ fn read_text(file_name: &str) -> Vec<u8> {
     text
 }
 
-fn do_work(file_name: &str) {
+fn do_test(file_name: &str) {
     let lzd_file_name = format!("{}.lzd", file_name);
     let unlzd_file_name = format!("{}.unlzd", file_name);
 
@@ -54,56 +54,56 @@ mod tests {
 
     #[test]
     fn alice29() {
-        do_work(&format!("{}/alice29.txt", CANTRBRY_DIR));
+        do_test(&format!("{}/alice29.txt", CANTRBRY_DIR));
     }
 
     #[test]
     fn asyoulik() {
-        do_work(&format!("{}/asyoulik.txt", CANTRBRY_DIR));
+        do_test(&format!("{}/asyoulik.txt", CANTRBRY_DIR));
     }
 
     #[test]
     fn cp() {
-        do_work(&format!("{}/cp.html", CANTRBRY_DIR));
+        do_test(&format!("{}/cp.html", CANTRBRY_DIR));
     }
 
     #[test]
     fn fields() {
-        do_work(&format!("{}/fields.c", CANTRBRY_DIR));
+        do_test(&format!("{}/fields.c", CANTRBRY_DIR));
     }
 
     #[test]
     fn grammar() {
-        do_work(&format!("{}/grammar.lsp", CANTRBRY_DIR));
+        do_test(&format!("{}/grammar.lsp", CANTRBRY_DIR));
     }
 
     #[test]
     fn kennedy() {
-        do_work(&format!("{}/kennedy.xls", CANTRBRY_DIR));
+        do_test(&format!("{}/kennedy.xls", CANTRBRY_DIR));
     }
 
     #[test]
     fn lcet10() {
-        do_work(&format!("{}/lcet10.txt", CANTRBRY_DIR));
+        do_test(&format!("{}/lcet10.txt", CANTRBRY_DIR));
     }
 
     #[test]
     fn plrabn12() {
-        do_work(&format!("{}/plrabn12.txt", CANTRBRY_DIR));
+        do_test(&format!("{}/plrabn12.txt", CANTRBRY_DIR));
     }
 
     #[test]
     fn ptt5() {
-        do_work(&format!("{}/ptt5", CANTRBRY_DIR));
+        do_test(&format!("{}/ptt5", CANTRBRY_DIR));
     }
 
     #[test]
     fn sum() {
-        do_work(&format!("{}/sum", CANTRBRY_DIR));
+        do_test(&format!("{}/sum", CANTRBRY_DIR));
     }
 
     #[test]
     fn xargs() {
-        do_work(&format!("{}/xargs.1", CANTRBRY_DIR));
+        do_test(&format!("{}/xargs.1", CANTRBRY_DIR));
     }
 }
