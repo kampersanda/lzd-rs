@@ -87,7 +87,7 @@ fn main() {
         eprintln!("Compression time in ms: {}", elapsed_ms);
         eprintln!("Compression time in sec: {}", elapsed_ms / 1000.0);
         eprintln!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
-        eprintln!("Compression ratio in file size: {:.3}", cmpr_ratio_fs);
+        eprintln!("Compression ratio in filesize: {:.3}", cmpr_ratio_fs);
         eprintln!("Number of defined LZD-factors: {}", defined_factors);
         eprintln!("Number of written LZD-factors: {}", written_factors);
 
