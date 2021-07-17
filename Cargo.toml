@@ -16,7 +16,8 @@ edition = "2018"
 
 [features]
 debug_print = []
+cli_test = ["assert_cmd"]
 
 [dependencies]
 clap = "2.33.3"
-assert_cmd = "1.0.7"
+assert_cmd = {version = "1.0.7", optional = true}
