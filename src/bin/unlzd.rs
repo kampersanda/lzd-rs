@@ -72,5 +72,5 @@ fn main() {
 
     println!("Decompression time in ms: {}", elapsed_ms);
     println!("Decompression time in sec: {}", elapsed_ms / 1000.0);
-    println!("Number of extracted factors: {}", ids.len());
+    println!("Number of extracted LZD-factors: {}", ids.len());
 }

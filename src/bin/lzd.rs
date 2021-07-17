@@ -62,11 +62,14 @@ fn main() {
     ser.finish().unwrap();
     let elapsed_ms = ins.elapsed().as_millis() as f64;
 
-    let lzd_size = metadata(&output_fn).unwrap().len() as f64;
+    let lzd_size = metadata(&output_fn).unwrap().len();
+    let cmpr_ratio_fs = lzd_size as f64 / text.len() as f64;
+    let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
 
-    println!("Compression ratio: {:.3}", lzd_size / text.len() as f64);
     println!("Compression time in ms: {}", elapsed_ms);
     println!("Compression time in sec: {}", elapsed_ms / 1000.0);
-    println!("Number of defined factors: {}", num_factors);
-    println!("Number of written factors: {}", written_factors);
+    println!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
+    println!("Compression ratio in file size: {:.3}", cmpr_ratio_fs);
+    println!("Number of defined LZD-factors: {}", num_factors);
+    println!("Number of written LZD-factors: {}", written_factors);
 }
