@@ -1,4 +1,4 @@
-use crate::basic::NIL_ID;
+use crate::misc::NIL_ID;
 use std::cmp;
 
 #[derive(Debug)]
@@ -52,7 +52,7 @@ impl<'text> Trie<'text> {
     }
 
     /// Add from the given node a new child with the given Factor ID.
-    pub fn add_child(&mut self, node_id: usize, new_factor_id: usize, text: &'text [u8]) -> usize {
+    pub fn add_child(&mut self, node_id: usize, new_factor_id: usize, text: &'text [u8]) {
         if self.nodes[node_id].child_id == NIL_ID {
             let new_child_id = self.push_node(Node {
                 factor_id: new_factor_id,
@@ -61,7 +61,7 @@ impl<'text> Trie<'text> {
                 edge_text: text,
             });
             self.nodes[node_id].child_id = new_child_id;
-            return new_child_id;
+            return;
         }
 
         let mut child_id = self.nodes[node_id].child_id;
@@ -76,7 +76,7 @@ impl<'text> Trie<'text> {
                 self.nodes[child_id].edge_text = &edge_text[lcp..];
 
                 let middle_id = self.push_node(Node {
-                    factor_id: new_factor_id,
+                    factor_id: NIL_ID,
                     child_id: child_id,
                     sibling_id: self.nodes[child_id].sibling_id,
                     edge_text: &edge_text[..lcp],
@@ -92,14 +92,16 @@ impl<'text> Trie<'text> {
                 if lcp < text.len() {
                     // Add a new child in the middle
                     let new_sibling_id = self.push_node(Node {
-                        factor_id: NIL_ID,
+                        factor_id: new_factor_id,
                         child_id: NIL_ID,
                         sibling_id: NIL_ID,
                         edge_text: &text[lcp..],
                     });
                     self.nodes[child_id].sibling_id = new_sibling_id;
+                } else {
+                    self.nodes[middle_id].factor_id = new_factor_id;
                 }
-                return middle_id;
+                return;
             }
 
             if self.nodes[child_id].sibling_id == NIL_ID {
@@ -110,7 +112,7 @@ impl<'text> Trie<'text> {
                     edge_text: text,
                 });
                 self.nodes[child_id].sibling_id = new_sibling_id;
-                return new_sibling_id;
+                return;
             }
 
             prev_id = child_id;

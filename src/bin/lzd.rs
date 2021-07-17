@@ -1,11 +1,5 @@
-#[macro_use]
-mod macros;
+use lzd::compressor::Compressor;
 
-mod basic;
-mod compressor;
-mod trie;
-
-use crate::compressor::Compressor;
 use clap::{App, Arg};
 use std::fs::File;
 use std::io::Read;
@@ -16,7 +10,7 @@ fn main() {
         .author("Kampersanda <shnsk.knd@gmail.com>")
         .arg(
             Arg::with_name("input")
-                .help("input file name to be compressed")
+                .help("input file name to be compressed or decompressed")
                 .required(true),
         )
         .get_matches();
@@ -30,6 +24,6 @@ fn main() {
     Compressor::run(&text, encode);
 }
 
-fn encode(factor_id: usize, factor_count: usize) {
-    println!("{},{}", factor_id, factor_count);
+fn encode(factor_id: usize) {
+    println!("{}", factor_id);
 }

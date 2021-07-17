@@ -1,5 +1,8 @@
+#![allow(dead_code)]
+#![allow(unused_macros)]
+#![allow(unused_imports)]
+
 #[macro_export]
-#[allow(unused_macros)]
 #[cfg(feature = "debug_print")]
 macro_rules! debug_print {
     () => {};
@@ -12,7 +15,6 @@ macro_rules! debug_print {
 }
 
 #[macro_export]
-#[allow(unused_macros)]
 #[cfg(not(feature = "debug_print"))]
 macro_rules! debug_print {
     () => {};
