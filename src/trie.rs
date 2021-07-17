@@ -123,7 +123,7 @@ impl<'text> Trie<'text> {
 
     /// Find the child with the edge text.
     pub fn find_child(&self, node_id: usize, text: &'text [u8]) -> usize {
-        assert!(!text.is_empty());
+        debug_assert!(!text.is_empty());
 
         let mut child_id = self.nodes[node_id].child_id;
         loop {

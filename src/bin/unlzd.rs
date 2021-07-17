@@ -1,10 +1,9 @@
-use lzd::decompressor::{Decompressor, FACTOR_OFFSET};
-use lzd::deserializer::Deserializer;
-use lzd::misc::needed_bits;
+use lzd::bit_deserializer::BitDeserializer;
+use lzd::tools;
 
 use clap::{App, Arg};
-use std::fs::File;
-use std::io::{BufReader, BufWriter, Write};
+use std::fs::{metadata, File};
+use std::io::{stdout, BufReader, BufWriter};
 use std::path::Path;
 use std::time;
 
@@ -14,65 +13,84 @@ fn main() {
         .author("Kampersanda <shnsk.knd@gmail.com>")
         .arg(
             Arg::with_name("input_fn")
-                .help("input file name to be decompressed (whose ext is .lzd)")
+                .help("input file name to be uncompressed.")
                 .required(true),
         )
         .arg(
-            Arg::with_name("output_fn")
-                .short("o")
-                .long("output")
+            Arg::with_name("suffix")
+                .short("S")
+                .long("suffix")
                 .takes_value(true)
-                .help("output file name of uncompressed file"),
+                .help("Extension of input file name (=lzd)."),
+        )
+        .arg(
+            Arg::with_name("stdout")
+                .short("c")
+                .long("stdout")
+                .takes_value(false)
+                .help("Write the result into the stdout, or not."),
+        )
+        .arg(
+            Arg::with_name("force")
+                .short("f")
+                .long("force")
+                .takes_value(false)
+                .help("Overwrite the file, or not."),
         )
         .get_matches();
 
     let input_fn = matches.value_of("input_fn").unwrap();
 
-    let input_path = Path::new(input_fn);
-    if input_path.extension().unwrap() != "lzd" {
-        panic!("The input extension is not '.lzd'.");
-    }
+    let to_stdout = match matches.occurrences_of("stdout") {
+        0 => false,
+        _ => true,
+    };
 
-    let default_output_fn = input_path.file_stem().unwrap().to_str().unwrap();
-    let output_fn = matches.value_of("output_fn").unwrap_or(&default_output_fn);
+    let is_force = match matches.occurrences_of("force") {
+        0 => false,
+        _ => true,
+    };
 
-    let mut stream = BufWriter::new(File::create(output_fn).unwrap());
-    let mut ids: Vec<usize> = Vec::new();
-
-    {
-        let file = File::open(&input_fn).unwrap();
-        let mut stream = Deserializer::new(BufReader::new(file));
-
-        let mut upper = (FACTOR_OFFSET + 1) as u64; // +1 to avoid use of factor ID zero.
-        let mut nbits = needed_bits(upper);
-        let mut twice = false;
-
-        loop {
-            let fid = match stream.read(nbits) {
-                Ok(v) => v,
-                Err(_) => 0,
-            };
-
-            if fid == 0 {
-                break;
-            }
-
-            ids.push((fid - 1) as usize);
-
-            if twice {
-                upper += 1;
-                nbits = needed_bits(upper);
-            }
-            twice = !twice;
+    if !to_stdout {
+        let input_path = Path::new(input_fn);
+        let suffix = matches.value_of("suffix").unwrap_or("lzd");
+        if input_path.extension().unwrap() != suffix {
+            eprintln!("The input extension is not {}.", suffix);
+            return;
         }
+
+        let output_fn = input_path.file_stem().unwrap().to_str().unwrap();
+        if !is_force && metadata(&output_fn).is_ok() {
+            eprintln!("There already exists {}.", &output_fn);
+            return;
+        }
+
+        let in_stream = BitDeserializer::new(BufReader::new(File::open(&input_fn).unwrap()));
+        let out_stream = BufWriter::new(File::create(&output_fn).unwrap());
+
+        let ins = time::Instant::now();
+        let ext_factors = tools::deserialize_and_decompress(in_stream, out_stream);
+        let elapsed_ms = ins.elapsed().as_millis() as f64;
+
+        eprintln!("Decompression time in ms: {}", elapsed_ms);
+        eprintln!("Decompression time in sec: {}", elapsed_ms / 1000.0);
+        eprintln!("Number of extracted LZD-factors: {}", ext_factors);
+    } else {
+        if is_force {
+            eprintln!("The option 'force' is ignored since stdout is enabled.");
+        }
+
+        let out = stdout();
+
+        let in_stream = BitDeserializer::new(BufReader::new(File::open(&input_fn).unwrap()));
+        let out_stream = BufWriter::new(out.lock());
+
+        let ins = time::Instant::now();
+        let ext_factors = tools::deserialize_and_decompress(in_stream, out_stream);
+        let elapsed_ms = ins.elapsed().as_millis() as f64;
+
+        eprintln!("Decompression time in ms: {}", elapsed_ms);
+        eprintln!("Decompression time in sec: {}", elapsed_ms / 1000.0);
+        eprintln!("Number of extracted LZD-factors: {}", ext_factors);
     }
-
-    let ins = time::Instant::now();
-    Decompressor::run(&ids, |c| stream.write_all(&[c]).unwrap());
-    stream.flush().unwrap();
-    let elapsed_ms = ins.elapsed().as_millis() as f64;
-
-    println!("Decompression time in ms: {}", elapsed_ms);
-    println!("Decompression time in sec: {}", elapsed_ms / 1000.0);
-    println!("Number of extracted LZD-factors: {}", ids.len());
 }

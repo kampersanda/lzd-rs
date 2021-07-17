@@ -88,7 +88,7 @@ impl<'text> Compressor<'text> {
     /// Find the deepest node traversed by the longest prefix of text.
     /// If trace == true, the traced nodes from the deepest factered node are stored.
     fn find_longest_match(&mut self, text: &'text [u8], trace: bool) -> Factor {
-        assert!(!text.is_empty());
+        debug_assert!(!text.is_empty());
 
         if trace {
             self.traced.clear();

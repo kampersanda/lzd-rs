@@ -34,7 +34,7 @@ impl<'ids> Decompressor<'ids> {
             output(id as u8);
         } else {
             id -= FACTOR_OFFSET;
-            assert!(id * 2 + 1 < self.ids.len());
+            debug_assert!(id * 2 + 1 < self.ids.len());
             output = self.decode(self.ids[id * 2], output);
             output = self.decode(self.ids[id * 2 + 1], output);
         }

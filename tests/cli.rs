@@ -1,49 +1,10 @@
 use assert_cmd::Command;
-use std::fs::{remove_file, File};
-use std::io::Read;
-
-fn read_text(file_name: &str) -> Vec<u8> {
-    let mut text: Vec<u8> = Vec::new();
-    {
-        let mut file = File::open(file_name).unwrap();
-        let _ = file.read_to_end(&mut text).unwrap();
-    }
-    text
-}
+use std::fs::remove_file;
 
 fn do_test(file_name: &str) {
-    let lzd_file_name = format!("{}.lzd", file_name);
-    let unlzd_file_name = format!("{}.unlzd", file_name);
-
-    {
-        let mut cmd = Command::cargo_bin("lzd").unwrap();
-        cmd.arg(&file_name)
-            .arg("-o")
-            .arg(&lzd_file_name)
-            .assert()
-            .success();
-    }
-
-    {
-        let mut cmd = Command::cargo_bin("unlzd").unwrap();
-        cmd.arg(&lzd_file_name)
-            .arg("-o")
-            .arg(&unlzd_file_name)
-            .assert()
-            .success();
-    }
-
-    let text1 = read_text(&file_name);
-    let text2 = read_text(&unlzd_file_name);
-
-    assert_eq!(text1.len(), text2.len());
-
-    for i in 0..text1.len() {
-        assert_eq!(text1[i], text2[i]);
-    }
-
-    remove_file(lzd_file_name).unwrap();
-    remove_file(unlzd_file_name).unwrap();
+    let mut cmd = Command::cargo_bin("lzd").unwrap();
+    cmd.arg(&file_name).arg("-f").arg("-t").assert().success();
+    remove_file(format!("{}.lzd", file_name)).unwrap();
 }
 
 #[cfg(test)]
