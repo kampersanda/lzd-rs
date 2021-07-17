@@ -1,24 +1,27 @@
 use crate::misc::bytes_for;
 
-use std::fs::File;
-use std::io::{BufReader, Read, Result};
+use std::io::{Read, Result};
 
 ///! Bit-wise deserializer.
-pub struct Deserializer {
-    stream: BufReader<File>,
+pub struct Deserializer<R>
+where
+    R: Read,
+{
+    stream: R,
     buffer: [u8; 1],
     cursor: usize,
 }
 
-impl Deserializer {
-    pub fn new(filepath: &str) -> Result<Deserializer> {
-        let file = File::open(filepath)?;
-        let stream = BufReader::new(file);
-        Ok(Deserializer {
+impl<R> Deserializer<R>
+where
+    R: Read,
+{
+    pub fn new(stream: R) -> Deserializer<R> {
+        Deserializer {
             stream: stream,
             buffer: [0; 1],
             cursor: 0,
-        })
+        }
     }
 
     pub fn read(&mut self, mut nbits: usize) -> Result<u64> {
@@ -63,11 +66,11 @@ impl Deserializer {
 
 #[cfg(test)]
 mod tests {
-    use crate::deserializer::Deserializer;
+    use super::*;
     use crate::misc::needed_bits;
 
     use std::fs::{remove_file, File};
-    use std::io::Write;
+    use std::io::{BufReader, Write};
 
     #[test]
     fn tiny() {
@@ -76,15 +79,16 @@ mod tests {
         let ints = [7, 45, 34, 255, 256, 3, 500000, 444];
         let bytes = [111, 197, 127, 128, 131, 132, 158, 55]; // serialized ints
         {
-            let mut file = File::create(tmpfile).unwrap();
+            let mut file = File::create(&tmpfile).unwrap();
             file.write_all(&bytes).unwrap();
         }
 
         {
-            let mut des = Deserializer::new(tmpfile).unwrap();
+            let file = File::open(&tmpfile).unwrap();
+            let mut stream = Deserializer::new(BufReader::new(file));
             for x in ints {
                 let nbits = needed_bits(x);
-                let y = des.read(nbits).unwrap();
+                let y = stream.read(nbits).unwrap();
                 assert_eq!(x, y);
             }
         }

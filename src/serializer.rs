@@ -1,22 +1,25 @@
-use std::fs::File;
-use std::io::{BufWriter, Result, Write};
+use std::io::{Result, Write};
 
 ///! Bit-wise serializer.
-pub struct Serializer {
-    stream: BufWriter<File>,
+pub struct Serializer<W>
+where
+    W: Write,
+{
+    stream: W,
     buffer: [u8; 8],
     cursor: usize,
 }
 
-impl Serializer {
-    pub fn new(filepath: &str) -> Result<Serializer> {
-        let file = File::create(filepath)?;
-        let stream = BufWriter::new(file);
-        Ok(Serializer {
+impl<W> Serializer<W>
+where
+    W: Write,
+{
+    pub fn new(stream: W) -> Serializer<W> {
+        Serializer {
             stream: stream,
             buffer: [0; 8],
             cursor: 0,
-        })
+        }
     }
 
     pub fn write(&mut self, mut x: u64, mut nbits: usize) -> Result<()> {
@@ -71,10 +74,11 @@ impl Serializer {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::misc::needed_bits;
-    use crate::serializer::Serializer;
 
     use std::fs::{remove_file, File};
+    use std::io::BufWriter;
     use std::io::Read;
 
     #[test]
@@ -83,12 +87,13 @@ mod tests {
 
         let ints = [7, 45, 34, 255, 256, 3, 500000, 444];
         {
-            let mut ser = Serializer::new(tmpfile).unwrap();
+            let file = File::create(tmpfile).unwrap();
+            let mut stream = Serializer::new(BufWriter::new(file));
             for x in &ints {
                 let nbits = needed_bits(*x);
-                ser.write(*x, nbits).unwrap();
+                stream.write(*x, nbits).unwrap();
             }
-            ser.finish().unwrap();
+            stream.finish().unwrap();
         }
 
         let mut serialized: u64 = 0;

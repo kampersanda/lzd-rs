@@ -4,7 +4,7 @@ use lzd::misc::needed_bits;
 
 use clap::{App, Arg};
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufReader, BufWriter, Write};
 use std::path::Path;
 use std::time;
 
@@ -40,13 +40,15 @@ fn main() {
     let mut ids: Vec<usize> = Vec::new();
 
     {
-        let mut deser = Deserializer::new(input_fn).unwrap();
+        let file = File::open(&input_fn).unwrap();
+        let mut stream = Deserializer::new(BufReader::new(file));
+
         let mut upper = (FACTOR_OFFSET + 1) as u64; // +1 to avoid use of factor ID zero.
         let mut nbits = needed_bits(upper);
         let mut twice = false;
 
         loop {
-            let fid = match deser.read(nbits) {
+            let fid = match stream.read(nbits) {
                 Ok(v) => v,
                 Err(_) => 0,
             };

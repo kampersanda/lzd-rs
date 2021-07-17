@@ -4,7 +4,7 @@ use lzd::serializer::Serializer;
 
 use clap::{App, Arg};
 use std::fs::{metadata, File};
-use std::io::Read;
+use std::io::{BufWriter, Read};
 use std::time;
 
 fn main() {
@@ -36,7 +36,9 @@ fn main() {
         let _ = file.read_to_end(&mut text).unwrap();
     }
 
-    let mut ser = Serializer::new(&output_fn).unwrap();
+    let file = File::create(&output_fn).unwrap();
+    let mut stream = Serializer::new(BufWriter::new(file));
+
     let mut upper = (FACTOR_OFFSET + 1) as u64; // +1 to avoid use of factor ID zero.
     let mut nbits = needed_bits(upper);
     let mut twice = false;
@@ -47,7 +49,7 @@ fn main() {
         let fid = (id + 1) as u64; // +1 to avoid use of factor ID zero.
         assert!(needed_bits(fid) <= nbits);
 
-        ser.write(fid, nbits).unwrap();
+        stream.write(fid, nbits).unwrap();
         written_factors += 1;
 
         if twice {
@@ -59,7 +61,7 @@ fn main() {
 
     let ins = time::Instant::now();
     let num_factors = Compressor::run(&text, outputter);
-    ser.finish().unwrap();
+    stream.finish().unwrap();
     let elapsed_ms = ins.elapsed().as_millis() as f64;
 
     let lzd_size = metadata(&output_fn).unwrap().len();
