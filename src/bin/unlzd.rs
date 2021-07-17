@@ -59,7 +59,7 @@ fn main() {
             return;
         }
 
-        let output_fn = input_path.file_stem().unwrap().to_str().unwrap();
+        let output_fn = &input_fn[..input_fn.len() - suffix.len() - 1];
         if !is_force && metadata(&output_fn).is_ok() {
             eprintln!("There already exists {}.", &output_fn);
             return;
