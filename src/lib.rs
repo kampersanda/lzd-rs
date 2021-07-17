@@ -1,3 +1,7 @@
+//! # lzd-rs
+//!
+//! Rust implementation of LZ double-factor factorizatoin.
+//!
 #[macro_use]
 mod macros;
 
