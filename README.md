@@ -67,7 +67,9 @@ text: "abaaabababaabbabab"
 
 ## Commnad line tools
 
-This library provides two command line tools for compression and decompression. The tools will print the command line options by specifying the parameter `-h`. In the tools, LZ factors are serialized into a binary stream, in the same manner as `tdc::BitCorder` of [tudocomp](https://tudocomp.github.io/).
+This library provides two command line tools for compression and decompression. The tools will print the command line options by specifying the parameter `-h`.
+
+In the tools, LZ factors are serialized into a binary stream, in the same manner as `tdc::BitCorder` of [tudocomp](https://tudocomp.github.io/).
 
 ### `lzd` command
 
