@@ -1,20 +1,16 @@
-#[cfg(feature = "cli_test")]
-use assert_cmd::Command;
-use std::fs::remove_file;
-
-#[cfg(feature = "cli_test")]
-fn do_test(file_name: &str) {
-    let mut cmd = Command::cargo_bin("lzd").unwrap();
-    cmd.arg(&file_name).arg("-f").arg("-t").assert().success();
-    remove_file(format!("{}.lzd", file_name)).unwrap();
-}
-
 #[cfg(test)]
 #[cfg(feature = "cli_test")]
 mod tests {
-    use super::*;
+    use assert_cmd::Command;
+    use std::fs::remove_file;
 
     const CANTRBRY_DIR: &str = "cantrbry";
+
+    fn do_test(file_name: &str) {
+        let mut cmd = Command::cargo_bin("lzd").unwrap();
+        cmd.arg(&file_name).arg("-f").arg("-t").assert().success();
+        remove_file(format!("{}.lzd", file_name)).unwrap();
+    }
 
     #[test]
     fn alice29() {
