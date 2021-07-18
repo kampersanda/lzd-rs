@@ -91,8 +91,8 @@ mod tests {
         {
             let file = File::open(&tmpfile).unwrap();
             let mut stream = BitDeserializer::new(BufReader::new(file));
-            for x in ints {
-                let nbits = needed_bits(x);
+            for x in &ints {
+                let nbits = needed_bits(*x);
                 let y = stream.read(nbits).unwrap();
                 assert_eq!(x, y);
             }
