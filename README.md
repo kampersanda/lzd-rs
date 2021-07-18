@@ -72,9 +72,7 @@ This library provides two command line tools for compression and decompression. 
 It compresses an input data and writes the result into a file with the extension `lzd`. In the following case, `english.50MB.lzd` will be written as the compressed file.
 
 ```
-$ ./target/release/lzd english.50MB
-Compression time in ms: 12216
-Compression time in sec: 12.216
+$ ./target/release/lzd english.50MB -l
 Compression ratio in factors: 0.121
 Compression ratio in filesize: 0.313
 Number of defined LZD-factors: 3177320
@@ -87,9 +85,6 @@ It decompresses a compressed file and writes the original data into a file witho
 
 ```
 $ ./target/release/unlzd english.50MB.lzd
-Decompression time in ms: 1573
-Decompression time in sec: 1.573
-Number of extracted LZD-factors: 6354129
 ```
 
 ## Licensing
