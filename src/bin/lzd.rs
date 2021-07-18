@@ -5,7 +5,6 @@ use lzd::tools;
 use clap::{App, Arg};
 use std::fs::{metadata, File};
 use std::io::{stdout, BufReader, BufWriter, Read, Result, Write};
-use std::time;
 
 fn main() {
     let matches = App::new("lzd")
@@ -38,6 +37,13 @@ fn main() {
                 .help("Overwrite the file, or not."),
         )
         .arg(
+            Arg::with_name("list")
+                .short("l")
+                .long("list")
+                .takes_value(false)
+                .help("List the statistics, or not."),
+        )
+        .arg(
             Arg::with_name("test")
                 .short("t")
                 .long("test")
@@ -54,6 +60,11 @@ fn main() {
     };
 
     let is_force = match matches.occurrences_of("force") {
+        0 => false,
+        _ => true,
+    };
+
+    let do_list = match matches.occurrences_of("list") {
         0 => false,
         _ => true,
     };
@@ -75,21 +86,18 @@ fn main() {
         let file = File::create(&output_fn).unwrap();
         let in_stream = BitSerializer::new(BufWriter::new(file));
 
-        let ins = time::Instant::now();
         let text = load_text(&input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, in_stream);
-        let elapsed_ms = ins.elapsed().as_millis() as f64;
 
-        let lzd_size = metadata(&output_fn).unwrap().len();
-        let cmpr_ratio_fs = lzd_size as f64 / text.len() as f64;
-        let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
-
-        eprintln!("Compression time in ms: {}", elapsed_ms);
-        eprintln!("Compression time in sec: {}", elapsed_ms / 1000.0);
-        eprintln!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
-        eprintln!("Compression ratio in filesize: {:.3}", cmpr_ratio_fs);
-        eprintln!("Number of defined LZD-factors: {}", defined_factors);
-        eprintln!("Number of written LZD-factors: {}", written_factors);
+        if do_list {
+            let compressed_size = metadata(&output_fn).unwrap().len();
+            let cmpr_ratio_fs = compressed_size as f64 / text.len() as f64;
+            let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
+            eprintln!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
+            eprintln!("Compression ratio in filesize: {:.3}", cmpr_ratio_fs);
+            eprintln!("Number of defined LZD-factors: {}", defined_factors);
+            eprintln!("Number of written LZD-factors: {}", written_factors);
+        }
 
         if do_test {
             eprintln!("Testing now...");
@@ -107,27 +115,24 @@ fn main() {
         }
     } else {
         if is_force {
-            eprintln!("The option 'force' is ignored since stdout is enabled.");
+            eprintln!("The option 'force' is ignored when stdout is enabled.");
         }
         if do_test {
-            eprintln!("The option 'test' is ignored since stdout is enabled.");
+            eprintln!("The option 'test' is ignored when stdout is enabled.");
         }
 
         let out = stdout();
         let stream = BitSerializer::new(BufWriter::new(out.lock()));
 
-        let ins = time::Instant::now();
         let text = load_text(&input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, stream);
-        let elapsed_ms = ins.elapsed().as_millis() as f64;
 
-        let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
-
-        eprintln!("Compression time in ms: {}", elapsed_ms);
-        eprintln!("Compression time in sec: {}", elapsed_ms / 1000.0);
-        eprintln!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
-        eprintln!("Number of defined LZD-factors: {}", defined_factors);
-        eprintln!("Number of written LZD-factors: {}", written_factors);
+        if do_list {
+            let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
+            eprintln!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
+            eprintln!("Number of defined LZD-factors: {}", defined_factors);
+            eprintln!("Number of written LZD-factors: {}", written_factors);
+        }
     }
 }
 

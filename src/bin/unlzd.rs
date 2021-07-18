@@ -5,7 +5,6 @@ use clap::{App, Arg};
 use std::fs::{metadata, File};
 use std::io::{stdout, BufReader, BufWriter};
 use std::path::Path;
-use std::time;
 
 fn main() {
     let matches = App::new("unlzd")
@@ -67,30 +66,15 @@ fn main() {
 
         let in_stream = BitDeserializer::new(BufReader::new(File::open(&input_fn).unwrap()));
         let out_stream = BufWriter::new(File::create(&output_fn).unwrap());
-
-        let ins = time::Instant::now();
-        let ext_factors = tools::deserialize_and_decompress(in_stream, out_stream);
-        let elapsed_ms = ins.elapsed().as_millis() as f64;
-
-        eprintln!("Decompression time in ms: {}", elapsed_ms);
-        eprintln!("Decompression time in sec: {}", elapsed_ms / 1000.0);
-        eprintln!("Number of extracted LZD-factors: {}", ext_factors);
+        tools::deserialize_and_decompress(in_stream, out_stream);
     } else {
         if is_force {
             eprintln!("The option 'force' is ignored since stdout is enabled.");
         }
 
         let out = stdout();
-
         let in_stream = BitDeserializer::new(BufReader::new(File::open(&input_fn).unwrap()));
         let out_stream = BufWriter::new(out.lock());
-
-        let ins = time::Instant::now();
-        let ext_factors = tools::deserialize_and_decompress(in_stream, out_stream);
-        let elapsed_ms = ins.elapsed().as_millis() as f64;
-
-        eprintln!("Decompression time in ms: {}", elapsed_ms);
-        eprintln!("Decompression time in sec: {}", elapsed_ms / 1000.0);
-        eprintln!("Number of extracted LZD-factors: {}", ext_factors);
+        tools::deserialize_and_decompress(in_stream, out_stream);
     }
 }
