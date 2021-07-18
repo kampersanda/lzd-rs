@@ -147,8 +147,6 @@ mod tests {
     use crate::compressor::Compressor;
     use crate::decompressor::Decompressor;
     use std::collections::HashSet;
-    use std::fs::File;
-    use std::io::Read;
 
     #[derive(PartialEq, Eq, Hash, Debug)]
     struct DoubleFactor(usize, usize);
@@ -196,20 +194,5 @@ mod tests {
 
         check_duplication(&ids);
         check_decompress(&ids, text);
-    }
-
-    #[test]
-    fn alice29() {
-        let mut file = File::open("cantrbry/alice29.txt").unwrap();
-        let mut text: Vec<u8> = Vec::new();
-        let _ = file.read_to_end(&mut text).unwrap();
-
-        let mut ids: Vec<usize> = Vec::new();
-        Compressor::run(&text, |id: usize| {
-            ids.push(id);
-        });
-
-        check_duplication(&ids);
-        check_decompress(&ids, &text);
     }
 }
