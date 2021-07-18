@@ -94,7 +94,7 @@ mod tests {
             for x in &ints {
                 let nbits = needed_bits(*x);
                 let y = stream.read(nbits).unwrap();
-                assert_eq!(x, y);
+                assert_eq!(*x, y);
             }
         }
 
