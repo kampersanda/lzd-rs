@@ -1,5 +1,5 @@
 # lzd-rs
-[![Documentation](https://docs.rs/lzd/badge.svg)](https://docs.rs/lzd) [![Crates.io](https://img.shields.io/crates/v/lzd.svg)](https://crates.io/crates/lzd)
+[![Documentation](https://docs.rs/lzd/badge.svg)](https://docs.rs/lzd) [![Crates.io](https://img.shields.io/crates/v/lzd.svg)](https://crates.io/crates/lzd) ![](https://github.com/kampersanda/lzd-rs/actions/workflows/rust.yml/badge.svg)
 
 This library provides a Rust implementation of LZ double-factor factorization, an efficient grammar-based compression algorithm, proposed in the paper:
 
