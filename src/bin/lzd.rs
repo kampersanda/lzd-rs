@@ -3,7 +3,7 @@ use lzd::bit_serializer::BitSerializer;
 use lzd::tools;
 
 use clap::{App, Arg};
-use std::fs::{metadata, File};
+use std::fs::{metadata, remove_file, File};
 use std::io::{stdout, BufReader, BufWriter, Read, Result, Write};
 
 fn main() {
@@ -34,14 +34,7 @@ fn main() {
                 .short("f")
                 .long("force")
                 .takes_value(false)
-                .help("Overwrite the file, or not."),
-        )
-        .arg(
-            Arg::with_name("list")
-                .short("l")
-                .long("list")
-                .takes_value(false)
-                .help("List the statistics, or not."),
+                .help("Forcibly overwrite the file, or not."),
         )
         .arg(
             Arg::with_name("test")
@@ -49,6 +42,13 @@ fn main() {
                 .long("test")
                 .takes_value(false)
                 .help("Test the compressed file, or not."),
+        )
+        .arg(
+            Arg::with_name("remove")
+                .short("r")
+                .long("remove")
+                .takes_value(false)
+                .help("Remove the source file after compression, or not."),
         )
         .get_matches();
 
@@ -64,12 +64,12 @@ fn main() {
         _ => true,
     };
 
-    let do_list = match matches.occurrences_of("list") {
+    let do_test = match matches.occurrences_of("test") {
         0 => false,
         _ => true,
     };
 
-    let do_test = match matches.occurrences_of("test") {
+    let do_remove = match matches.occurrences_of("remove") {
         0 => false,
         _ => true,
     };
@@ -77,6 +77,7 @@ fn main() {
     if !to_stdout {
         let suffix = matches.value_of("suffix").unwrap_or("lzd");
         let output_fn = format!("{}.{}", input_fn, suffix);
+        eprintln!("Compressed filename will be {}", &output_fn);
 
         if !is_force && metadata(&output_fn).is_ok() {
             eprintln!("There already exists {}.", &output_fn);
@@ -89,18 +90,25 @@ fn main() {
         let text = load_text(&input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, in_stream);
 
-        if do_list {
-            let compressed_size = metadata(&output_fn).unwrap().len();
-            let cmpr_ratio_fs = compressed_size as f64 / text.len() as f64;
-            let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
-            eprintln!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
-            eprintln!("Compression ratio in filesize: {:.3}", cmpr_ratio_fs);
-            eprintln!("Number of defined LZD-factors: {}", defined_factors);
-            eprintln!("Number of written LZD-factors: {}", written_factors);
-        }
+        let compressed_size = metadata(&output_fn).unwrap().len();
+        let cmpr_ratio_fs = compressed_size as f64 / text.len() as f64;
+        let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
+
+        eprintln!(
+            "{} bytes were compressed into {} bytes ({:.2}%)",
+            text.len(),
+            compressed_size,
+            cmpr_ratio_fs * 100.0
+        );
+        eprintln!(
+            "{} characters were factorized into {} LZD-factors ({:.2}%)",
+            text.len(),
+            written_factors,
+            cmpr_ratio_fc * 100.0
+        );
+        eprintln!("{} LZD-factors were defined", defined_factors);
 
         if do_test {
-            eprintln!("Testing now...");
             let in_stream = BitDeserializer::new(BufReader::new(File::open(&output_fn).unwrap()));
             let mut out_stream = TextBuffer { text: Vec::new() };
             let ext_factors = tools::deserialize_and_decompress(in_stream, &mut out_stream);
@@ -111,7 +119,7 @@ fn main() {
             for i in 0..text.len() {
                 assert_eq!(text[i], decoded[i]);
             }
-            eprintln!("No problem!");
+            eprintln!("Passed the decompression test!");
         }
     } else {
         if is_force {
@@ -127,12 +135,20 @@ fn main() {
         let text = load_text(&input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, stream);
 
-        if do_list {
-            let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
-            eprintln!("Compression ratio in factors: {:.3}", cmpr_ratio_fc);
-            eprintln!("Number of defined LZD-factors: {}", defined_factors);
-            eprintln!("Number of written LZD-factors: {}", written_factors);
-        }
+        let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
+
+        eprintln!(
+            "{} characters were factorized into {} LZD-factors ({:.2}%)",
+            text.len(),
+            written_factors,
+            cmpr_ratio_fc * 100.0
+        );
+        eprintln!("{} LZD-factors were defined", defined_factors);
+    }
+
+    if do_remove {
+        remove_file(input_fn).unwrap();
+        eprintln!("Removed the source file {}", input_fn);
     }
 }
 
