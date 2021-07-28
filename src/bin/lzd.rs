@@ -80,7 +80,8 @@ fn main() {
         eprintln!("Compressed filename will be {}", &output_fn);
 
         if !is_force && metadata(&output_fn).is_ok() {
-            eprintln!("There already exists {}.", &output_fn);
+            eprintln!("The output file already exists: {}", &output_fn);
+            eprintln!("Please set the command option 'force' to overwrite");
             return;
         }
 
@@ -123,10 +124,10 @@ fn main() {
         }
     } else {
         if is_force {
-            eprintln!("The option 'force' is ignored when stdout is enabled.");
+            eprintln!("The option 'force' was ignored since stdout is enabled");
         }
         if do_test {
-            eprintln!("The option 'test' is ignored when stdout is enabled.");
+            eprintln!("The option 'test' was ignored since stdout is enabled");
         }
 
         let out = stdout();

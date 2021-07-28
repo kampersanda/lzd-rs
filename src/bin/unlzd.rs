@@ -66,13 +66,14 @@ fn main() {
         let input_path = Path::new(input_fn);
         let suffix = matches.value_of("suffix").unwrap_or("lzd");
         if input_path.extension().unwrap() != suffix {
-            eprintln!("The input extension is not {}.", suffix);
+            eprintln!("The input extension is not {}", suffix);
             return;
         }
 
         let output_fn = &input_fn[..input_fn.len() - suffix.len() - 1];
         if !is_force && metadata(&output_fn).is_ok() {
-            eprintln!("There already exists {}.", &output_fn);
+            eprintln!("The output file already exists: {}", &output_fn);
+            eprintln!("Please set the command option 'force' to overwrite");
             return;
         }
 
@@ -81,7 +82,7 @@ fn main() {
         tools::deserialize_and_decompress(in_stream, out_stream);
     } else {
         if is_force {
-            eprintln!("The option 'force' is ignored since stdout is enabled.");
+            eprintln!("The option 'force' was ignored since stdout is enabled");
         }
 
         let out = stdout();
