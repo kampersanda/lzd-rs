@@ -2,13 +2,13 @@ use lzd::bit_deserializer::BitDeserializer;
 use lzd::tools;
 
 use clap::{App, Arg};
-use std::fs::{metadata, File};
+use std::fs::{metadata, remove_file, File};
 use std::io::{stdout, BufReader, BufWriter};
 use std::path::Path;
 
 fn main() {
     let matches = App::new("unlzd")
-        .version("0.1.0")
+        .version("0.1.1")
         .author("Kampersanda <shnsk.knd@gmail.com>")
         .arg(
             Arg::with_name("input_fn")
@@ -34,7 +34,14 @@ fn main() {
                 .short("f")
                 .long("force")
                 .takes_value(false)
-                .help("Overwrite the file, or not."),
+                .help("Forcibly overwrite the file, or not."),
+        )
+        .arg(
+            Arg::with_name("remove")
+                .short("r")
+                .long("remove")
+                .takes_value(false)
+                .help("Remove the source file after decompression, or not."),
         )
         .get_matches();
 
@@ -46,6 +53,11 @@ fn main() {
     };
 
     let is_force = match matches.occurrences_of("force") {
+        0 => false,
+        _ => true,
+    };
+
+    let do_remove = match matches.occurrences_of("remove") {
         0 => false,
         _ => true,
     };
@@ -76,5 +88,10 @@ fn main() {
         let in_stream = BitDeserializer::new(BufReader::new(File::open(&input_fn).unwrap()));
         let out_stream = BufWriter::new(out.lock());
         tools::deserialize_and_decompress(in_stream, out_stream);
+    }
+
+    if do_remove {
+        remove_file(input_fn).unwrap();
+        eprintln!("Removed the source file {}", input_fn);
     }
 }

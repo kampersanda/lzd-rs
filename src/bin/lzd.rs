@@ -8,7 +8,7 @@ use std::io::{stdout, BufReader, BufWriter, Read, Result, Write};
 
 fn main() {
     let matches = App::new("lzd")
-        .version("0.1.0")
+        .version("0.1.1")
         .author("Kampersanda <shnsk.knd@gmail.com>")
         .arg(
             Arg::with_name("input_fn")
