@@ -21,7 +21,9 @@ pub fn compress_and_serialize<S: Serializer>(text: &[u8], mut stream: S) -> (usi
 
         if twice {
             upper += 1;
-            nbits = needed_bits(upper);
+            if upper >> nbits != 0 {
+                nbits += 1;
+            }
         }
         twice = !twice;
     };
@@ -57,7 +59,9 @@ where
 
         if twice {
             upper += 1;
-            nbits = needed_bits(upper);
+            if upper >> nbits != 0 {
+                nbits += 1;
+            }
         }
         twice = !twice;
     }
