@@ -76,11 +76,11 @@ In the tools, LZ factors are serialized into a binary stream, in the same manner
 It compresses an input data and writes the result into a file with the extension `lzd`. In the following case, `english.50MB.lzd` will be written as the compressed file.
 
 ```
-$ ./target/release/lzd english.50MB -l
-Compression ratio in factors: 0.121
-Compression ratio in filesize: 0.313
-Number of defined LZD-factors: 3177320
-Number of written LZD-factors: 6354129
+$ lzd english.50MB
+Compressed filename will be /home/kampersanda/dataset/pizzachili/text/english/english.50MB.lzd
+52428800 bytes were compressed into 16426243 bytes (31.33%)
+52428800 characters were factorized into 6354129 LZD-factors (12.12%)
+3177320 LZD-factors were defined
 ```
 
 ### `unlzd` command
