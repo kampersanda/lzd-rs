@@ -83,7 +83,7 @@ mod tests {
     use super::*;
     use crate::misc::needed_bits;
 
-    use std::fs::{remove_file, File};
+    use std::fs::{File, remove_file};
     use std::io::BufWriter;
     use std::io::Read;
 
