@@ -1,14 +1,14 @@
 #![allow(dead_code)]
 
-pub fn bytes_for(nbits: usize) -> usize {
-    (nbits + 7) / 8
+pub const fn bytes_for(nbits: usize) -> usize {
+    nbits.div_ceil(8)
 }
 
-pub fn needed_bits(x: u64) -> usize {
+pub const fn needed_bits(x: u64) -> usize {
     msb(x) + 1
 }
 
-pub fn msb(mut x: u64) -> usize {
+pub const fn msb(mut x: u64) -> usize {
     if x == 0 {
         return 0;
     }
@@ -24,7 +24,7 @@ pub fn msb(mut x: u64) -> usize {
     bit_position(x)
 }
 
-fn bit_position(x: u64) -> usize {
+const fn bit_position(x: u64) -> usize {
     DEBRUIJN64_MAPPING[(DEBRUIJN64.wrapping_mul(x) >> 58) as usize] as usize
 }
 

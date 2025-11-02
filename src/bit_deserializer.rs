@@ -2,7 +2,7 @@ use crate::deserializer::Deserializer;
 use crate::misc::bytes_for;
 use std::io::{Read, Result};
 
-///! Bit-wise deserializer.
+/// Bit-wise deserializer.
 pub struct BitDeserializer<R>
 where
     R: Read,
@@ -16,9 +16,9 @@ impl<R> BitDeserializer<R>
 where
     R: Read,
 {
-    pub fn new(stream: R) -> BitDeserializer<R> {
-        BitDeserializer {
-            stream: stream,
+    pub const fn new(stream: R) -> Self {
+        Self {
+            stream,
             buffer: [0; 1],
             cursor: 0,
         }

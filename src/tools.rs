@@ -46,10 +46,7 @@ where
     let mut ids: Vec<usize> = Vec::new();
 
     loop {
-        let fid = match in_stream.read(nbits) {
-            Ok(v) => v,
-            Err(_) => 0,
-        };
+        let fid = in_stream.read(nbits).unwrap_or_default();
 
         if fid == 0 {
             break;

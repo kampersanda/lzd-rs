@@ -54,25 +54,13 @@ fn main() {
 
     let input_fn = matches.value_of("input_fn").unwrap();
 
-    let to_stdout = match matches.occurrences_of("stdout") {
-        0 => false,
-        _ => true,
-    };
+    let to_stdout = !matches!(matches.occurrences_of("stdout"), 0);
 
-    let is_force = match matches.occurrences_of("force") {
-        0 => false,
-        _ => true,
-    };
+    let is_force = !matches!(matches.occurrences_of("force"), 0);
 
-    let do_test = match matches.occurrences_of("test") {
-        0 => false,
-        _ => true,
-    };
+    let do_test = !matches!(matches.occurrences_of("test"), 0);
 
-    let do_remove = match matches.occurrences_of("remove") {
-        0 => false,
-        _ => true,
-    };
+    let do_remove = !matches!(matches.occurrences_of("remove"), 0);
 
     if !to_stdout {
         let suffix = matches.value_of("suffix").unwrap_or("lzd");
@@ -88,7 +76,7 @@ fn main() {
         let file = File::create(&output_fn).unwrap();
         let in_stream = BitSerializer::new(BufWriter::new(file));
 
-        let text = load_text(&input_fn);
+        let text = load_text(input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, in_stream);
 
         let compressed_size = metadata(&output_fn).unwrap().len();
@@ -133,7 +121,7 @@ fn main() {
         let out = stdout();
         let stream = BitSerializer::new(BufWriter::new(out.lock()));
 
-        let text = load_text(&input_fn);
+        let text = load_text(input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, stream);
 
         let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;

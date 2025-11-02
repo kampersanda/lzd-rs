@@ -12,7 +12,7 @@ impl<'ids> Decompressor<'ids> {
     where
         F: FnMut(u8),
     {
-        let mut worker = Decompressor { ids: ids };
+        let mut worker = Decompressor { ids };
         worker.do_work(output);
     }
 

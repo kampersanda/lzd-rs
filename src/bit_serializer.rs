@@ -1,7 +1,7 @@
 use crate::serializer::Serializer;
 use std::io::{Result, Write};
 
-///! Bit-wise serializer.
+/// Bit-wise serializer.
 pub struct BitSerializer<W>
 where
     W: Write,
@@ -15,9 +15,9 @@ impl<W> BitSerializer<W>
 where
     W: Write,
 {
-    pub fn new(stream: W) -> BitSerializer<W> {
-        BitSerializer {
-            stream: stream,
+    pub const fn new(stream: W) -> Self {
+        Self {
+            stream,
             buffer: [0; 8],
             cursor: 0,
         }

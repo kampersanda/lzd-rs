@@ -47,20 +47,11 @@ fn main() {
 
     let input_fn = matches.value_of("input_fn").unwrap();
 
-    let to_stdout = match matches.occurrences_of("stdout") {
-        0 => false,
-        _ => true,
-    };
+    let to_stdout = !matches!(matches.occurrences_of("stdout"), 0);
 
-    let is_force = match matches.occurrences_of("force") {
-        0 => false,
-        _ => true,
-    };
+    let is_force = !matches!(matches.occurrences_of("force"), 0);
 
-    let do_remove = match matches.occurrences_of("remove") {
-        0 => false,
-        _ => true,
-    };
+    let do_remove = !matches!(matches.occurrences_of("remove"), 0);
 
     if !to_stdout {
         let input_path = Path::new(input_fn);
@@ -71,14 +62,14 @@ fn main() {
         }
 
         let output_fn = &input_fn[..input_fn.len() - suffix.len() - 1];
-        if !is_force && metadata(&output_fn).is_ok() {
+        if !is_force && metadata(output_fn).is_ok() {
             eprintln!("The output file already exists: {}", &output_fn);
             eprintln!("Please set the command option 'force' to overwrite");
             return;
         }
 
-        let in_stream = BitDeserializer::new(BufReader::new(File::open(&input_fn).unwrap()));
-        let out_stream = BufWriter::new(File::create(&output_fn).unwrap());
+        let in_stream = BitDeserializer::new(BufReader::new(File::open(input_fn).unwrap()));
+        let out_stream = BufWriter::new(File::create(output_fn).unwrap());
         tools::deserialize_and_decompress(in_stream, out_stream);
     } else {
         if is_force {
@@ -86,7 +77,7 @@ fn main() {
         }
 
         let out = stdout();
-        let in_stream = BitDeserializer::new(BufReader::new(File::open(&input_fn).unwrap()));
+        let in_stream = BitDeserializer::new(BufReader::new(File::open(input_fn).unwrap()));
         let out_stream = BufWriter::new(out.lock());
         tools::deserialize_and_decompress(in_stream, out_stream);
     }
