@@ -1,68 +1,45 @@
 use lzd::bit_deserializer::BitDeserializer;
 use lzd::tools;
 
-use clap::{App, Arg};
-use std::fs::{metadata, remove_file, File};
-use std::io::{stdout, BufReader, BufWriter};
+use clap::{ArgAction, Parser};
+use std::fs::{File, metadata, remove_file};
+use std::io::{BufReader, BufWriter, stdout};
 use std::path::Path;
 
+#[derive(Parser)]
+#[command(name = "unlzd", version, author, about, long_about = None)]
+struct Args {
+    #[arg()]
+    input_fn: String,
+
+    #[arg(short = 'S', long = "suffix", default_value = "lzd")]
+    suffix: String,
+
+    #[arg(short, long, action = ArgAction::SetTrue)]
+    stdout: bool,
+
+    #[arg(short, long, action = ArgAction::SetTrue)]
+    force: bool,
+
+    #[arg(short, long, action = ArgAction::SetTrue)]
+    remove: bool,
+}
+
 fn main() {
-    let matches = App::new("unlzd")
-        .version("0.1.1")
-        .author("Kampersanda <shnsk.knd@gmail.com>")
-        .arg(
-            Arg::with_name("input_fn")
-                .help("input file name to be uncompressed.")
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("suffix")
-                .short("S")
-                .long("suffix")
-                .takes_value(true)
-                .help("Extension of input file name (=lzd)."),
-        )
-        .arg(
-            Arg::with_name("stdout")
-                .short("c")
-                .long("stdout")
-                .takes_value(false)
-                .help("Write the result into the stdout, or not."),
-        )
-        .arg(
-            Arg::with_name("force")
-                .short("f")
-                .long("force")
-                .takes_value(false)
-                .help("Forcibly overwrite the file, or not."),
-        )
-        .arg(
-            Arg::with_name("remove")
-                .short("r")
-                .long("remove")
-                .takes_value(false)
-                .help("Remove the source file after decompression, or not."),
-        )
-        .get_matches();
+    let cli = Args::parse();
 
-    let input_fn = matches.value_of("input_fn").unwrap();
+    let input_fn = &cli.input_fn;
 
-    let to_stdout = !matches!(matches.occurrences_of("stdout"), 0);
-
-    let is_force = !matches!(matches.occurrences_of("force"), 0);
-
-    let do_remove = !matches!(matches.occurrences_of("remove"), 0);
-
-    if !to_stdout {
+    if !cli.stdout {
         let input_path = Path::new(input_fn);
-        let suffix = matches.value_of("suffix").unwrap_or("lzd");
-        if input_path.extension().unwrap() != suffix {
+        let suffix = &cli.suffix;
+        if input_path.extension().unwrap().to_str() != Some(suffix) {
             eprintln!("The input extension is not {}", suffix);
             return;
         }
 
         let output_fn = &input_fn[..input_fn.len() - suffix.len() - 1];
-        if !is_force && metadata(output_fn).is_ok() {
+        if !cli.force && metadata(output_fn).is_ok() {
             eprintln!("The output file already exists: {}", &output_fn);
             eprintln!("Please set the command option 'force' to overwrite");
             return;
@@ -72,7 +49,7 @@ fn main() {
         let out_stream = BufWriter::new(File::create(output_fn).unwrap());
         tools::deserialize_and_decompress(in_stream, out_stream);
     } else {
-        if is_force {
+        if cli.force {
             eprintln!("The option 'force' was ignored since stdout is enabled");
         }
 
@@ -82,7 +59,7 @@ fn main() {
         tools::deserialize_and_decompress(in_stream, out_stream);
     }
 
-    if do_remove {
+    if cli.remove {
         remove_file(input_fn).unwrap();
         eprintln!("Removed the source file {}", input_fn);
     }
