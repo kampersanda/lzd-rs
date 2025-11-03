@@ -12,7 +12,12 @@ struct Args {
     #[arg(help = "Input compressed file name")]
     input_fn: String,
 
-    #[arg(short = 'S', long = "suffix", default_value = "lzd", help = "Extension for the compressed file")]
+    #[arg(
+        short = 'S',
+        long = "suffix",
+        default_value = "lzd",
+        help = "Extension for the compressed file"
+    )]
     suffix: String,
 
     #[arg(short, long, action = ArgAction::SetTrue, help = "Output to standard output")]
