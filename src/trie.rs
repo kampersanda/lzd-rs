@@ -27,8 +27,14 @@ fn longest_common_prefix(a: &[u8], b: &[u8]) -> usize {
 }
 
 /// A first-child next sibling trie implementaton.
+impl<'text> Default for Trie<'text> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'text> Trie<'text> {
-    pub fn new() -> Trie<'text> {
+    pub fn new() -> Self {
         Trie {
             nodes: vec![Node {
                 factor_id: NIL_ID,
@@ -78,7 +84,7 @@ impl<'text> Trie<'text> {
 
                 let middle_id = self.push_node(Node {
                     factor_id: NIL_ID,
-                    child_id: child_id,
+                    child_id,
                     sibling_id: self.nodes[child_id].sibling_id,
                     edge_text: &edge_text[..lcp],
                 });

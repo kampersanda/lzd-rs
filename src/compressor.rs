@@ -1,4 +1,4 @@
-use crate::trie::{Trie, NIL_ID};
+use crate::trie::{NIL_ID, Trie};
 
 pub const FACTOR_OFFSET: usize = 256;
 

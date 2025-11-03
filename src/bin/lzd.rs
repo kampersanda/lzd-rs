@@ -2,84 +2,48 @@ use lzd::bit_deserializer::BitDeserializer;
 use lzd::bit_serializer::BitSerializer;
 use lzd::tools;
 
-use clap::{App, Arg};
-use std::fs::{metadata, remove_file, File};
-use std::io::{stdout, BufReader, BufWriter, Read, Result, Write};
+use clap::{ArgAction, Parser};
+use std::fs::{File, metadata, remove_file};
+use std::io::{BufReader, BufWriter, Read, Result, Write, stdout};
+
+#[derive(Parser)]
+#[command(name = "lzd", version, author, about, long_about = None)]
+struct Args {
+    #[arg(help = "Input file name")]
+    input_fn: String,
+
+    #[arg(
+        short = 'S',
+        long = "suffix",
+        default_value = "lzd",
+        help = "Extension for the compressed file"
+    )]
+    suffix: String,
+
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Output to standard output")]
+    stdout: bool,
+
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Overwrite existing files")]
+    force: bool,
+
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Run decompression after compression for the test")]
+    test: bool,
+
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Remove the source file after compression")]
+    remove: bool,
+}
 
 fn main() {
-    let matches = App::new("lzd")
-        .version("0.1.1")
-        .author("Kampersanda <shnsk.knd@gmail.com>")
-        .arg(
-            Arg::with_name("input_fn")
-                .help("Input file name to be compressed.")
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("suffix")
-                .short("S")
-                .long("suffix")
-                .takes_value(true)
-                .help("Extension of output file name (=lzd)."),
-        )
-        .arg(
-            Arg::with_name("stdout")
-                .short("c")
-                .long("stdout")
-                .takes_value(false)
-                .help("Write the result into the stdout, or not."),
-        )
-        .arg(
-            Arg::with_name("force")
-                .short("f")
-                .long("force")
-                .takes_value(false)
-                .help("Forcibly overwrite the file, or not."),
-        )
-        .arg(
-            Arg::with_name("test")
-                .short("t")
-                .long("test")
-                .takes_value(false)
-                .help("Test the compressed file, or not."),
-        )
-        .arg(
-            Arg::with_name("remove")
-                .short("r")
-                .long("remove")
-                .takes_value(false)
-                .help("Remove the source file after compression, or not."),
-        )
-        .get_matches();
+    let cli = Args::parse();
 
-    let input_fn = matches.value_of("input_fn").unwrap();
+    let input_fn = &cli.input_fn;
 
-    let to_stdout = match matches.occurrences_of("stdout") {
-        0 => false,
-        _ => true,
-    };
-
-    let is_force = match matches.occurrences_of("force") {
-        0 => false,
-        _ => true,
-    };
-
-    let do_test = match matches.occurrences_of("test") {
-        0 => false,
-        _ => true,
-    };
-
-    let do_remove = match matches.occurrences_of("remove") {
-        0 => false,
-        _ => true,
-    };
-
-    if !to_stdout {
-        let suffix = matches.value_of("suffix").unwrap_or("lzd");
+    if !cli.stdout {
+        let suffix = &cli.suffix;
         let output_fn = format!("{}.{}", input_fn, suffix);
         eprintln!("Compressed filename will be {}", &output_fn);
 
-        if !is_force && metadata(&output_fn).is_ok() {
+        if cli.force && metadata(&output_fn).is_ok() {
             eprintln!("The output file already exists: {}", &output_fn);
             eprintln!("Please set the command option 'force' to overwrite");
             return;
@@ -88,7 +52,7 @@ fn main() {
         let file = File::create(&output_fn).unwrap();
         let in_stream = BitSerializer::new(BufWriter::new(file));
 
-        let text = load_text(&input_fn);
+        let text = load_text(input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, in_stream);
 
         let compressed_size = metadata(&output_fn).unwrap().len();
@@ -109,7 +73,7 @@ fn main() {
         );
         eprintln!("{} LZD-factors were defined", defined_factors);
 
-        if do_test {
+        if cli.test {
             let in_stream = BitDeserializer::new(BufReader::new(File::open(&output_fn).unwrap()));
             let mut out_stream = TextBuffer { text: Vec::new() };
             let ext_factors = tools::deserialize_and_decompress(in_stream, &mut out_stream);
@@ -123,17 +87,17 @@ fn main() {
             eprintln!("Passed the decompression test!");
         }
     } else {
-        if is_force {
+        if cli.force {
             eprintln!("The option 'force' was ignored since stdout is enabled");
         }
-        if do_test {
+        if cli.test {
             eprintln!("The option 'test' was ignored since stdout is enabled");
         }
 
         let out = stdout();
         let stream = BitSerializer::new(BufWriter::new(out.lock()));
 
-        let text = load_text(&input_fn);
+        let text = load_text(input_fn);
         let (defined_factors, written_factors) = tools::compress_and_serialize(&text, stream);
 
         let cmpr_ratio_fc = written_factors as f64 / text.len() as f64;
@@ -147,7 +111,7 @@ fn main() {
         eprintln!("{} LZD-factors were defined", defined_factors);
     }
 
-    if do_remove {
+    if cli.remove {
         remove_file(input_fn).unwrap();
         eprintln!("Removed the source file {}", input_fn);
     }
