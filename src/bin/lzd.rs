@@ -9,22 +9,22 @@ use std::io::{BufReader, BufWriter, Read, Result, Write, stdout};
 #[derive(Parser)]
 #[command(name = "lzd", version, author, about, long_about = None)]
 struct Args {
-    #[arg(long)]
+    #[arg(help = "Input file name")]
     input_fn: String,
 
-    #[arg(short = 'S', long = "suffix", default_value = "lzd")]
+    #[arg(short = 'S', long = "suffix", default_value = "lzd", help = "Extension for the compressed file")]
     suffix: String,
 
-    #[arg(short, long, action = ArgAction::SetTrue)]
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Output to standard output")]
     stdout: bool,
 
-    #[arg(short, long, action = ArgAction::SetTrue)]
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Overwrite existing files")]
     force: bool,
 
-    #[arg(short, long, action = ArgAction::SetTrue)]
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Run decompression after compression for the test")]
     test: bool,
 
-    #[arg(short, long, action = ArgAction::SetTrue)]
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Remove the source file after compression")]
     remove: bool,
 }
 

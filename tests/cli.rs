@@ -1,13 +1,13 @@
 #[cfg(test)]
 #[cfg(feature = "cli_test")]
 mod tests {
-    use assert_cmd::Command;
+    use assert_cmd::cargo::cargo_bin_cmd;
     use std::fs::remove_file;
 
     const CANTRBRY_DIR: &str = "cantrbry";
 
     fn do_test(file_name: &str) {
-        let mut cmd = Command::cargo_bin("lzd").unwrap();
+        let mut cmd = cargo_bin_cmd!("lzd");
         cmd.arg(&file_name).arg("-f").arg("-t").assert().success();
         remove_file(format!("{}.lzd", file_name)).unwrap();
     }

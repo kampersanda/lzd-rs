@@ -9,19 +9,19 @@ use std::path::Path;
 #[derive(Parser)]
 #[command(name = "unlzd", version, author, about, long_about = None)]
 struct Args {
-    #[arg()]
+    #[arg(help = "Input compressed file name")]
     input_fn: String,
 
-    #[arg(short = 'S', long = "suffix", default_value = "lzd")]
+    #[arg(short = 'S', long = "suffix", default_value = "lzd", help = "Extension for the compressed file")]
     suffix: String,
 
-    #[arg(short, long, action = ArgAction::SetTrue)]
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Output to standard output")]
     stdout: bool,
 
-    #[arg(short, long, action = ArgAction::SetTrue)]
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Overwrite existing files")]
     force: bool,
 
-    #[arg(short, long, action = ArgAction::SetTrue)]
+    #[arg(short, long, action = ArgAction::SetTrue, help = "Remove the source file after decompression")]
     remove: bool,
 }
 
